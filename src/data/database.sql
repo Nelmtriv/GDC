@@ -31,6 +31,13 @@ CREATE TABLE Morador (
     FOREIGN KEY (id_unidade) REFERENCES Unidade(id_unidade)
 );
 
+CREATE TABLE Sindico (
+    id_sindico INT AUTO_INCREMENT PRIMARY KEY,
+    id_usuario INT,
+    nome VARCHAR(100) NOT NULL,
+    FOREIGN KEY (id_usuario) REFERENCES Usuario(id_usuario)
+);
+
 CREATE TABLE Veiculo (
     id_veiculo INT AUTO_INCREMENT PRIMARY KEY,
     id_morador INT,

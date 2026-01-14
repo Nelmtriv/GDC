@@ -1,0 +1,214 @@
+/* ===== RESET ===== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+/* ===== BODY ===== */
+body {
+    background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+        url('../../img/coco.jpg') no-repeat center center fixed;
+    background-size: cover;
+    color: #1f2937;
+    min-height: 100vh;
+}
+
+/* ===== HEADER ===== */
+.dashboard-header {
+    background: rgba(255, 255, 255, 0.5);
+    color: #1f2937;
+    padding: 1.5rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-bottom: 3px solid #7e22ce;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.dashboard-header h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+}
+
+.dashboard-header h2 i {
+    color: #7e22ce;
+}
+
+.header-subtitle {
+    font-size: .875rem;
+    color: #6b7280;
+    margin-top: .25rem;
+}
+
+/* ===== USER ===== */
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+}
+
+.user-avatar {
+    width: 50px;
+    height: 50px;
+    background: #7e22ce;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-weight: 600;
+    box-shadow: 0 1px 3px rgba(0,0,0,.1);
+}
+
+.user-details {
+    text-align: right;
+}
+
+.user-name {
+    font-weight: 500;
+    font-size: 1rem;
+}
+
+.user-role {
+    font-size: .75rem;
+    color: #6b7280;
+    display: flex;
+    align-items: center;
+    gap: .25rem;
+}
+
+/* ===== LOGOUT ===== */
+.logout-btn {
+    background: #ff4757;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: .3s;
+}
+
+.logout-btn:hover {
+    background: #ff3742;
+    transform: translateY(-2px);
+}
+
+/* ===== MAIN ===== */
+.dashboard-container {
+    max-width: 1400px;
+    margin: 2rem auto;
+    padding: 0 1.25rem;
+}
+
+/* ===== WELCOME ===== */
+.welcome-section {
+    background: rgba(255,255,255,.6);
+    border-radius: .75rem;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 6px rgba(0,0,0,.1);
+}
+
+.welcome-section h1 {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+}
+
+.welcome-section h1 i {
+    color: #7e22ce;
+}
+
+.welcome-section p {
+    color: #222;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+}
+
+/* ===== ACTIONS ===== */
+.quick-actions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.action-btn {
+    background: #7e22ce;
+    color: #fff;
+    padding: 1rem;
+    border-radius: .5rem;
+    text-decoration: none;
+    display: flex;
+    justify-content: center;
+    gap: .75rem;
+    transition: .2s;
+}
+
+.action-btn:hover {
+    background: #5b21b6;
+    transform: translateY(-2px);
+}
+
+/* ===== CARDS ===== */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.dashboard-card {
+    background: rgba(255,255,255,.5);
+    border-radius: .75rem;
+    border: 1px solid #e5e7eb;
+    transition: .3s;
+}
+
+.dashboard-card:hover {
+    transform: translateY(-4px);
+    border-color: #a855f7;
+}
+
+/* ===== INFO ===== */
+.info-section {
+    background: #fff;
+    border-radius: .75rem;
+    padding: 2rem;
+}
+
+/* ===== FOOTER ===== */
+.dashboard-footer {
+    background: #fff;
+    color: #6b7280;
+    text-align: center;
+    padding: 1.5rem;
+    margin-top: 3rem;
+    border-top: 1px solid #e5e7eb;
+}
+
+/* ===== RESPONSIVO ===== */
+@media (max-width: 768px) {
+    .dashboard-header {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+    }
+
+    .user-info {
+        flex-direction: column;
+    }
+
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+}

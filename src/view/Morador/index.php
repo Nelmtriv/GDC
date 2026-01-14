@@ -1,11 +1,180 @@
+<?php
+require_once __DIR__ . '/../../data/conector.php';
+
+session_start();
+
+$conector = new Conector();
+$conexao = $conector->getConexao();
+
+$stmt = $conexao->prepare("Select * from morador Where id_usuario = ?");
+$stmt->bind_param("s", $_SESSION['id']);
+$stmt->execute();
+$resultado = $stmt->get_result();
+
+if($resultado->num_rows > 0) {
+    $row = $resultado->fetch_assoc();
+    $userName = $row['nome'];
+    $idMorador = $row['id_morador'];
+    $idUnidade = $row['id_unidade'];
+    $iniciais = strtoupper(substr($userName, 0, 1));
+}
+?>
+
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Dashboard - Morador</title>
+    <link rel="stylesheet" href="../../../assets/css/morador.css">
 </head>
+
 <body>
-    <h1>Olá Mundo!</h1>
+    <!-- Cabeçalho do Dashboard -->
+    <header class="dashboard-header">
+        <div class="header-left">
+            <h2><i class="fas fa-building"></i> Condomínio Digital</h2>
+            <div class="header-subtitle">Dashboard do Morador</div>
+        </div>
+
+        <div class="user-info">
+            <div class="user-avatar">
+                <?php echo $iniciais; ?>
+            </div>
+            <div class="user-details">
+                <div class="user-name"><?php echo $userName; ?></div>
+                <div class="user-role">
+                    <i class="fas fa-home"></i> Morador
+                </div>
+            </div>
+            <a href="../../logout.php?logout=1" class="logout-btn">
+                <i class="fas fa-sign-out-alt"></i> Sair
+            </a>
+        </div>
+    </header>
+
+    <!-- Conteúdo Principal -->
+    <main class="dashboard-container">
+        <!-- Seção de Boas-vindas -->
+        <section class="welcome-section">
+            <h1><i class="fas fa-home"></i> Bem-vindo, <?php echo $userName; ?>!</h1>
+            <p>Seu painel de controle para gerenciar todas as atividades do condomínio.
+                Aqui você pode agendar visitas, reservar áreas comuns, verificar encomendas
+                e acompanhar todas as informações importantes do seu condomínio.</p>
+
+            <div class="quick-actions">
+                <a href="visitas.php" class="action-btn">
+                    <i class="fas fa-calendar-plus"></i> Agendar Visita
+                </a>
+                <a href="reservas.php" class="action-btn">
+                    <i class="fas fa-glass-cheers"></i> Reservar Área
+                </a>
+                <a href="encomendas.php" class="action-btn">
+                    <i class="fas fa-box"></i> Ver Encomendas
+                </a>
+                <a href="avisos.php" class="action-btn">
+                    <i class="fas fa-bullhorn"></i> Ver Avisos
+                </a>
+                <a href="ocorrencias.php" class="action-btn">
+                    <i class="fas fa-exclamation-triangle"></i> Reportar Problema
+                </a>
+                <a href="perfil.php" class="action-btn">
+                    <i class="fas fa-user-edit"></i> Meu Perfil
+                </a>
+            </div>
+        </section>
+
+        <!-- Cards do Dashboard -->
+        <div class="dashboard-grid">
+            <!-- Card 1: Visitas -->
+            <div class="dashboard-card">
+                <div class="card-title">
+                    <i class="fas fa-users"></i> Visitas Agendadas
+                </div>
+                <div class="card-content">
+                    <p>0</p>
+                    <p>Nenhuma visita agendada</p>
+                </div>
+            </div>
+
+            <!-- Card 2: Reservas -->
+            <div class="dashboard-card">
+                <div class="card-title">
+                    <i class="fas fa-calendar-check"></i> Reservas Ativas
+                </div>
+                <div class="card-content">
+                    <p>0</p>
+                    <p>Nenhuma reserva ativa</p>
+                </div>
+            </div>
+
+            <!-- Card 3: Encomendas -->
+            <div class="dashboard-card">
+                <div class="card-title">
+                    <i class="fas fa-box-open"></i> Encomendas Pendentes
+                </div>
+                <div class="card-content">
+                    <p>0</p>
+                    <p>Nenhuma encomenda pendente</p>
+                </div>
+            </div>
+
+            <!-- Card 4: Avisos -->
+            <div class="dashboard-card">
+                <div class="card-title">
+                    <i class="fas fa-bullhorn"></i> Avisos Novos
+                </div>
+                <div class="card-content">
+                    <p>0</p>
+                    <p>Nenhum aviso novo</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Informações da Sessão -->
+        <section class="info-section">
+            <h3><i class="fas fa-info-circle"></i> Informações da Sessão</h3>
+            <table class="info-table">
+                <tr>
+                    <td><i class="fas fa-user"></i> Nome Completo</td>
+                    <td><?php echo $userName; ?></td>
+                </tr>
+                <tr>
+                    <td><i class="fas fa-envelope"></i> Email</td>
+                    <td><?php echo $_SESSION['email']; ?></td>
+                </tr>
+                <tr>
+                    <td><i class="fas fa-user-tag"></i> Tipo de Usuário</td>
+                    <td><?php echo $_SESSION["tipo"]; ?></td>
+                </tr>
+                <tr>
+                    <td><i class="fas fa-id-card"></i> ID do Morador</td>
+                    <td><?php echo $idMorador; ?></td>
+                </tr>
+                <tr>
+                    <td><i class="fas fa-building"></i> ID da Unidade</td>
+                    <td><?php echo $idUnidade; ?></td>
+                </tr>
+            </table>
+        </section>
+    </main>
+
+    <footer class="dashboard-footer">
+        <p>Sistema Condomínio Digital &copy; <?php echo date('Y'); ?></p>
+        <p>Desenvolvido por Nelma Odair Bila</p>
+    </footer>
+
+    <script>
+    // Adicionar animação aos cards
+    document.addEventListener('DOMContentLoaded', function() {
+        const cards = document.querySelectorAll('.dashboard-card');
+        cards.forEach((card, index) => {
+            card.style.animationDelay = `${index * 0.1}s`;
+            card.classList.add('fade-in');
+        });
+    });
+    </script>
 </body>
+
 </html>
