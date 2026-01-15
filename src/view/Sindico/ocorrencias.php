@@ -1,14 +1,21 @@
 <?php
+require_once __DIR__ . '/../../data/conector.php';
+
 session_start();
-require_once '../../controller/AuthController.php';
 
-$auth = new AuthController();
-$auth->checkAccess(['Sindico']);
+$conector = new Conector();
+$conexao = $conector->getConexao();
 
-$userName = $auth->getUserName();
-$primeiro_nome = explode(' ', $userName)[0];
-$iniciais = strtoupper(substr($primeiro_nome, 0, 1) . 
-                      (isset(explode(' ', $userName)[1]) ? substr(explode(' ', $userName)[1], 0, 1) : ''));
+$stmt = $conexao->prepare("Select * from sindico Where id_usuario = ?");
+$stmt->bind_param("s", $_SESSION['id']);
+$stmt->execute();
+$resultado = $stmt->get_result();
+
+if ($resultado->num_rows > 0) {
+    $row = $resultado->fetch_assoc();
+    $userName = $row['nome'];
+    $iniciais = strtoupper(substr($userName, 0, 1));
+}
 ?>
 
 <!DOCTYPE html>
@@ -301,7 +308,7 @@ $iniciais = strtoupper(substr($primeiro_nome, 0, 1) .
                 <div class="user-name"><?php echo $userName; ?></div>
                 <div class="user-role"><i class="fas fa-user-shield"></i> Síndico</div>
             </div>
-            <a href="sindico_dashboard.php" class="back-btn">
+            <a href="index.php" class="back-btn">
                 <i class="fas fa-arrow-left"></i> Voltar
             </a>
             <a href="../../controller/AuthController.php?action=logout" class="logout-btn">
