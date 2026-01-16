@@ -57,7 +57,6 @@ CREATE TABLE Agendamento (
     id_visitante INT,
     data DATE NOT NULL,
     hora TIME NOT NULL,
-    qr_code VARCHAR(255),
     FOREIGN KEY (id_morador) REFERENCES Morador(id_morador),
     FOREIGN KEY (id_visitante) REFERENCES Visitante(id_visitante)
 );

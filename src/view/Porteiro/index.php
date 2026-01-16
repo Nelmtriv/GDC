@@ -60,7 +60,7 @@ if($resultado->num_rows > 0) {
                e gerencie o fluxo de entrada e saída. Sua atenção aos detalhes garante a segurança de todos.</p>
             
             <div class="quick-actions">
-                <a href="registrar_visita.php" class="action-btn">
+                <a href="visita.php" class="action-btn">
                     <i class="fas fa-user-plus"></i> Registrar Visita
                 </a>
                 <a href="entregas.php" class="action-btn">
@@ -69,7 +69,7 @@ if($resultado->num_rows > 0) {
                 <a href="controle_acesso.php" class="action-btn">
                     <i class="fas fa-clipboard-check"></i> Controle de Acesso
                 </a>
-                <a href="avisos_porteiro.php" class="action-btn">
+                <a href="avisos.php" class="action-btn">
                     <i class="fas fa-bullhorn"></i> Avisos do Dia
                 </a>
                 <a href="emergencia.php" class="action-btn">
