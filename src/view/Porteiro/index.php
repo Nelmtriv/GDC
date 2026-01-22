@@ -24,14 +24,12 @@ if($resultado->num_rows > 0) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - Porteiro</title>
 
-    <!-- CSS DO PORTEIRO -->
     <link rel="stylesheet" href="../../../assets/css/porteiro.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 
 <body>
-
 <header class="dashboard-header">
     <div class="header-left">
         <h2><i class="fas fa-door-closed"></i> Condomínio Digital</h2>
@@ -52,10 +50,8 @@ if($resultado->num_rows > 0) {
     </div>
 </header>
 
-<!-- ===== CONTEÚDO ===== -->
 <main class="dashboard-container">
 
-    <!-- WELCOME -->
     <section class="welcome-section">
         <h1><i class="fas fa-user-shield"></i> Bem-vindo, <?php echo htmlspecialchars($userName); ?>!</h1>
         <p>

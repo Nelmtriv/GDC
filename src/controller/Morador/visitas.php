@@ -31,31 +31,39 @@ $idMorador = $morador['id_morador'];
 // Dados do formulário
 $nomeVisitante = trim($_POST['nome_visitante']);
 $documento     = trim($_POST['documento']);
+$motivo        = trim($_POST['motivo'] ?? '');
 $data          = $_POST['data'];
 $hora          = $_POST['hora'];
 
-if (!$nomeVisitante || !$documento || !$data || !$hora) {
+if (!$nomeVisitante || !$documento || !$motivo || !$data || !$hora) {
     $_SESSION['mensagem'] = 'Preencha todos os campos.';
     $_SESSION['tipo_mensagem'] = 'erro';
     header('Location: ../../view/morador/agendar_visita.php');
     exit;
 }
 
-// Inserir visitante
-$stmt = $conexao->prepare(
-    "INSERT INTO Visitante (nome, documento) VALUES (?, ?)"
+$stmt = $conexao->prepare("SELECT id_visitante FROM Visitante WHERE documento = ?");
+$stmt->bind_param("s", $documento);
+$stmt->execute();
+$vistante = $stmt->get_result()->fetch_assoc();
+
+if($vistante){
+    $idVistante = $visitante['id_visitante'];
+}else {
+    $stmt = $conexao->prepare(
+        "INSERT INTO Visitante (nome, documento) VALUES (?, ?)"
 );
 $stmt->bind_param("ss", $nomeVisitante, $documento);
 $stmt->execute();
-
 $idVisitante = $stmt->insert_id;
+}
 
 // Inserir agendamento
 $stmt = $conexao->prepare(
     "INSERT INTO Agendamento (id_morador, id_visitante, data, hora)
      VALUES (?, ?, ?, ?)"
 );
-$stmt->bind_param("iiss", $idMorador, $idVisitante, $data, $hora);
+$stmt->bind_param("iiss", $idMorador, $idVisitante, $data, $hora, $motivo);
 $stmt->execute();
 
 $_SESSION['mensagem'] = 'Visita agendada com sucesso!';

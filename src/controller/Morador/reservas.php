@@ -20,23 +20,49 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     // Validar se data é futura
-    $data_timestamp = strtotime($data);
-    $hoje_timestamp = strtotime(date('Y-m-d'));
-    
-    if ($data_timestamp < $hoje_timestamp) {
-        $_SESSION['mensagem'] = "Não é possível fazer reserva para datas passadas!";
+   // =====================
+// VALIDAÇÕES DE DATA E HORA
+// =====================
+
+date_default_timezone_set('Africa/Maputo');
+
+$data_atual = date('Y-m-d');
+$hora_atual = date('H:i');
+
+// Data no passado
+if ($data < $data_atual) {
+    $_SESSION['mensagem'] = "Não é possível reservar para datas passadas!";
+    $_SESSION['tipo_mensagem'] = "erro";
+    header("Location: ../../view/Morador/reservas.php");
+    exit();
+}
+
+// Se a data for hoje, validar hora
+if ($data === $data_atual) {
+
+    if ($hora_inicio <= $hora_atual) {
+        $_SESSION['mensagem'] = "A hora de início já passou!";
         $_SESSION['tipo_mensagem'] = "erro";
         header("Location: ../../view/Morador/reservas.php");
         exit();
     }
 
-    // Validar se hora_fim é maior que hora_inicio
-    if ($hora_fim <= $hora_inicio) {
-        $_SESSION['mensagem'] = "A hora de término deve ser maior que a hora de início!";
+    if ($hora_fim <= $hora_atual) {
+        $_SESSION['mensagem'] = "A hora de término já passou!";
         $_SESSION['tipo_mensagem'] = "erro";
         header("Location: ../../view/Morador/reservas.php");
         exit();
     }
+}
+
+// Hora fim menor ou igual à início
+if ($hora_fim <= $hora_inicio) {
+    $_SESSION['mensagem'] = "A hora de término deve ser maior que a hora de início!";
+    $_SESSION['tipo_mensagem'] = "erro";
+    header("Location: ../../view/Morador/reservas.php");
+    exit();
+}
+
 
     // Buscar o ID do morador logado
     $conector = new Conector();

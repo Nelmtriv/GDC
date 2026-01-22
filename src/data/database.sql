@@ -30,7 +30,7 @@ CREATE TABLE Morador (
     FOREIGN KEY (id_usuario) REFERENCES Usuario(id_usuario),
     FOREIGN KEY (id_unidade) REFERENCES Unidade(id_unidade)
 );
-
+select * from condominiodigital.porteiro;
 CREATE TABLE Sindico (
     id_sindico INT AUTO_INCREMENT PRIMARY KEY,
     id_usuario INT,
@@ -48,10 +48,9 @@ CREATE TABLE Veiculo (
 CREATE TABLE Visitante (
     id_visitante INT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,
-    documento VARCHAR(50) NOT NULL
+    documento VARCHAR(50) NOT NULL,
+    tipo_documento VARCHAR(50) NOT NULL
 );
-ALTER TABLE Visitante
-ADD COLUMN tipo_documento VARCHAR(50) NOT NULL;
 
 CREATE TABLE Agendamento (
     id_agendamento INT AUTO_INCREMENT PRIMARY KEY,
@@ -62,6 +61,12 @@ CREATE TABLE Agendamento (
     FOREIGN KEY (id_morador) REFERENCES Morador(id_morador),
     FOREIGN KEY (id_visitante) REFERENCES Visitante(id_visitante)
 );
+ALTER TABLE Agendamento
+ADD tipo_documento VARCHAR(30) NOT NULL,
+ADD numero_documento VARCHAR(30) NOT NULL;
+ALTER TABLE Agendamento
+ADD motivo VARCHAR(100) NOT NULL;
+
 
 
 CREATE TABLE Registro (
@@ -79,13 +84,13 @@ CREATE TABLE Aviso (
     titulo VARCHAR(100) NOT NULL,
     conteudo TEXT NOT NULL,
     prioridade ENUM('Baixa', 'Média', 'Alta') DEFAULT 'Baixa',
-    criado_por INT, -- Referência ao ID do Síndico ou Usuário Admin
+    criado_por INT,
     FOREIGN KEY (criado_por) REFERENCES Usuario(id_usuario)
 );
 
 CREATE TABLE Leitura_Aviso (
     id_aviso INT,
-    id_usuario INT, -- Pode ser morador, porteiro ou síndico
+    id_usuario INT, 
     data_leitura DATETIME DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id_aviso, id_usuario),
     FOREIGN KEY (id_aviso) REFERENCES Aviso(id_aviso),
@@ -103,11 +108,11 @@ CREATE TABLE Reserva (
 );
 
 CREATE TABLE Entrega (
-    id_entrega INT AUTO_INCREMENT PRIMARY KEY,  -- Alterado de id_encomenda
+    id_entrega INT AUTO_INCREMENT PRIMARY KEY, 
     id_morador INT,
     descricao VARCHAR(255) NOT NULL,
     data_recepcao DATETIME DEFAULT CURRENT_TIMESTAMP,
-    data_entrega DATETIME,                      -- Data em que o morador retirou o item
+    data_entrega DATETIME,                 
     status tinyint(1) default 0,
     FOREIGN KEY (id_morador) REFERENCES Morador(id_morador)
 );

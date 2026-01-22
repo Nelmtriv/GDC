@@ -1,3 +1,6 @@
+
+        
+
 <?php
 session_start();
 require_once __DIR__ . '/../../data/conector.php';
@@ -20,15 +23,23 @@ $stmt->bind_param("i", $_SESSION['id']);
 $stmt->execute();
 $morador = $stmt->get_result()->fetch_assoc();
 
-$idMorador = $morador['id_morador'];
+$idMorador   = $morador['id_morador'];
 $nomeMorador = $morador['nome'];
-$iniciais  = strtoupper(substr($nomeMorador, 0, 1));
+$iniciais    = strtoupper(substr($nomeMorador, 0, 1));
 
 /* Buscar visitas */
 $stmt = $conexao->prepare("
-    SELECT a.data, a.hora, v.nome AS visitante, v.documento
+    SELECT 
+        a.data,
+        a.hora,
+        a.motivo,
+        v.nome AS visitante,
+        v.documento,
+        r.entrada,
+        r.saida
     FROM Agendamento a
     JOIN Visitante v ON v.id_visitante = a.id_visitante
+    LEFT JOIN Registro r ON r.id_agendamento = a.id_agendamento
     WHERE a.id_morador = ?
     ORDER BY a.data DESC, a.hora DESC
 ");
@@ -39,14 +50,13 @@ $visitas = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
-    <meta charset="UTF-8">
-    <title>Minhas Visitas</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<meta charset="UTF-8">
+<title>Minhas Visitas</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <style>
-        * {
+<style>
+* {
             box-sizing: border-box;
             font-family: 'Poppins', sans-serif;
         }
@@ -385,32 +395,23 @@ $visitas = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
             background: #f4f6f9;
         }
 
-        /* ===== HEADER ===== */
+
         .dashboard-header {
-            background: #ffffff;
-            padding: 22px 36px;
+            background: rgba(255, 255, 255, 0.5);
+            padding: 20px 40px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-
-            border-radius: 14px;
-            /* aparência clean */
-            margin: 25px;
-            /* AQUI está o espaço */
-            margin-bottom: 30px;
-
-            border-bottom: 4px solid #9743d7;
-            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border-bottom: 3px solid #9743d7;
         }
 
-        /* ESQUERDA */
         .header-left h2 {
+            color: #333;
+            font-size: 24px;
             display: flex;
             align-items: center;
             gap: 10px;
-            font-size: 22px;
-            font-weight: 600;
-            color: #1f2937;
         }
 
         .header-left h2 i {
@@ -418,18 +419,10 @@ $visitas = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         }
 
         .header-subtitle {
+            color: #222;
             font-size: 14px;
-            color: #6b7280;
-            margin-top: 4px;
+            margin-top: 5px;
         }
-
-        /* DIREITA */
-        .header-actions {
-            display: flex;
-            align-items: center;
-            gap: 18px;
-        }
-
         /* BOTÃO */
         .btn-primary {
             background: #9743d7;
@@ -472,12 +465,10 @@ $visitas = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
             font-weight: 600;
         }
 
-        /* CONTEÚDO */
         .page-content {
             padding: 0 25px 40px;
         }
 
-        /* RESPONSIVO */
         @media (max-width: 768px) {
             .dashboard-header {
                 flex-direction: column;
@@ -497,159 +488,137 @@ $visitas = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     margin-bottom: 25px;
 }
 
-    </style>
+/* STATUS */
+.status{padding:5px 12px;border-radius:20px;font-size:12px;font-weight:600}
+.status-pendente{background:#fff3cd;color:#856404}
+.status-em{background:#ede9fe;color:#4a148c}
+.status-done{background:#dcfce7;color:#166534}
+
+/* BOTÃO */
+.btn-primary{
+    background:#9743d7;color:#fff;border:none;
+    padding:12px 18px;border-radius:10px;
+    cursor:pointer;display:flex;gap:8px;align-items:center
+}
+</style>
 </head>
 
 <body>
 
-    <div class="layout">
+<div class="layout">
 
-        <aside class="sidebar">
-            <h2>
-                <i class="fas fa-home"></i>
-                Morador
-            </h2>
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <h2><i class="fas fa-home"></i> Morador</h2>
+        <nav>
+            <a href="index.php"><i class="fas fa-chart-line"></i> Dashboard</a>
+            <a href="agendar_visita.php" class="active"><i class="fas fa-users"></i> Visitas</a>
+            <a href="reservas.php"><i class="fas fa-calendar-check"></i> Reservas</a>
+            <a href="encomendas.php"><i class="fas fa-box"></i> Encomendas</a>
+            <a href="avisos.php"><i class="fas fa-bullhorn"></i> Avisos</a>
+            <a href="ocorrencias.php"><i class="fas fa-exclamation-triangle"></i> Ocorrências</a>
+            <a href="../../logout.php?logout=1" class="logout">
+                <i class="fas fa-sign-out-alt"></i> Sair
+            </a>
+        </nav>
+    </aside>
 
-            <nav>
-                <a href="index.php">
-                    <i class="fas fa-chart-line"></i> Dashboard
-                </a>
+    <!-- CONTEÚDO -->
+    <main class="content">
 
-                <a href="agendar_visita.php" class="active" style="background: rgba(255,255,255,0.2);">
-                    <i class="fas fa-users"></i> Visitas
-                </a>
+        <header class="dashboard-header">
+            <div class="header-left">
+                <h2><i class="fas fa-users"></i> Minhas Visitas</h2>
+                <div class="header-subtitle">Consulte e agende visitas</div>
+            </div>
+            <div class="user-info">
+                <div class="user-avatar"><?= $iniciais ?></div>
+                <strong><?= htmlspecialchars($nomeMorador) ?></strong>
+            </div>
+        </header>
 
-                <a href="reservas.php">
-                    <i class="fas fa-calendar-check"></i> Reservas
-                </a>
+        <div class="container">
 
-                <a href="encomendas.php">
-                    <i class="fas fa-box"></i> Encomendas
-                </a>
-
-                <a href="avisos.php">
-                    <i class="fas fa-bullhorn"></i> Avisos
-                </a>
-
-                <a href="ocorrencias.php">
-                    <i class="fas fa-exclamation-triangle"></i> Ocorrências
-                </a>
-
-                <a href="../../logout.php?logout=1" class="logout">
-                    <i class="fas fa-sign-out-alt"></i> Sair
-                </a>
-            </nav>
-        </aside>
-
-        <main class="content">
-                <header class="dashboard-header">
-                    <div class="header-left">
-                        <h2>
-                            <i class="fas fa-users"></i>
-                            Minhas Visitas
-                        </h2>
-                        <div class="header-subtitle">
-                            Consulte e agende visitas para sua residência
-                        </div>
-                    </div>
-                        <div class="user-info">
-                            <div class="user-avatar"><?= $iniciais ?></div>
-                            <strong><?= htmlspecialchars($nomeMorador) ?></strong>
-                        </div>
-
-                </header>
-                <div class="container">
-
-<div class="page-actions">
-        <button class="btn-primary" onclick="abrirModal()">
-            <i class="fas fa-calendar-plus"></i>
-            Agendar Visita
-        </button>
-    </div>
-                <div class="visitas-grid">
-                    <?php if (empty($visitas)): ?>
-                        <p style="color:#777">Nenhuma visita agendada.</p>
-                    <?php else: ?>
-                        <?php foreach ($visitas as $v): ?>
-                            <div class="visita-card">
-                                <div class="visita-header">
-                                    <h4><?= htmlspecialchars($v['visitante']) ?></h4>
-                                </div>
-
-                                <div class="visita-info">
-                                    <div>
-                                        <i class="fas fa-id-card"></i>
-                                        <?= htmlspecialchars($v['documento']) ?>
-                                    </div>
-                                    <div>
-                                        <i class="fas fa-calendar"></i>
-                                        <?= date('d/m/Y', strtotime($v['data'])) ?>
-                                    </div>
-                                    <div>
-                                        <i class="fas fa-clock"></i>
-                                        <?= date('H:i', strtotime($v['hora'])) ?>
-                                    </div>
-                                </div>
-                            </div>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
-                </div>
-
+            <div class="page-actions">
+                <button class="btn-primary" onclick="abrirModal()">
+                    <i class="fas fa-calendar-plus"></i> Agendar Visita
+                </button>
             </div>
 
-        </main>
-    </div>
+            <?php if (empty($visitas)): ?>
+                <p style="color:#777">Nenhuma visita agendada.</p>
+            <?php else: ?>
 
-    <!-- MODAL -->
-    <div class="modal-overlay" id="modal">
-        <div class="modal">
-            <h3>
-                <i class="fas fa-calendar-plus"></i>
-                Agendar Visita
-            </h3>
+            <table style="width:100%;border-collapse:collapse;background:#fff">
+                <thead>
+                    <tr style="background:#f3f4f6">
+                        <th style="padding:14px">Visitante</th>
+                        <th>Documento</th>
+                        <th>Data</th>
+                        <th>Hora</th>
+                        <th>Motivo</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
 
-            <form action="../../controller/Morador/visitas.php" method="POST">
-                <div class="form-group">
-                    <label>Nome do Visitante</label>
-                    <input type="text" name="nome_visitante" required>
-                </div>
+                <?php foreach ($visitas as $v): ?>
+                    <?php
+                    if (!$v['entrada']) {
+                        $status = 'Agendada';
+                        $cls = 'status-pendente';
+                    } elseif (!$v['saida']) {
+                        $status = 'Em visita';
+                        $cls = 'status-em';
+                    } else {
+                        $status = 'Concluída';
+                        $cls = 'status-done';
+                    }
+                    ?>
 
-                <div class="form-group">
-                    <label>Documento</label>
-                    <input type="text" name="documento" required>
-                </div>
+                    <tr style="border-bottom:1px solid #e5e7eb">
+                        <td style="padding:14px"><?= htmlspecialchars($v['visitante']) ?></td>
+                        <td><?= htmlspecialchars($v['documento']) ?></td>
+                        <td><?= date('d/m/Y', strtotime($v['data'])) ?></td>
+                        <td><?= date('H:i', strtotime($v['hora'])) ?></td>
+                        <td><?= htmlspecialchars($v['motivo']) ?></td>
+                        <td><span class="status <?= $cls ?>"><?= $status ?></span></td>
+                    </tr>
+                <?php endforeach; ?>
 
-                <div class="form-group">
-                    <label>Data</label>
-                    <input type="date" name="data" required min="<?= date('Y-m-d') ?>">
-                </div>
+                </tbody>
+            </table>
 
-                <div class="form-group">
-                    <label>Hora</label>
-                    <input type="time" name="hora" required>
-                </div>
+            <?php endif; ?>
 
-                <button type="submit">
-                    <i class="fas fa-check"></i> Agendar Visita
-                </button>
-
-                <button type="button" class="close" onclick="fecharModal()">
-                    Cancelar
-                </button>
-            </form>
         </div>
+    </main>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal">
+    <div class="modal">
+        <h3><i class="fas fa-calendar-plus"></i> Agendar Visita</h3>
+
+        <form action="../../controller/Morador/visitas.php" method="POST">
+            <input type="text" name="nome_visitante" placeholder="Nome do visitante" required>
+            <input type="text" name="documento" placeholder="Documento" required>
+            <input type="text" name="motivo" placeholder="Motivo da visita" required>
+            <input type="date" name="data" required min="<?= date('Y-m-d') ?>">
+            <input type="time" name="hora" required>
+
+            <button type="submit" class="btn-primary">
+                <i class="fas fa-check"></i> Agendar
+            </button>
+            <button type="button" onclick="fecharModal()">Cancelar</button>
+        </form>
     </div>
+</div>
 
-    <script>
-        function abrirModal() {
-            document.getElementById('modal').style.display = 'flex';
-        }
-
-        function fecharModal() {
-            document.getElementById('modal').style.display = 'none';
-        }
-    </script>
+<script>
+function abrirModal(){document.getElementById('modal').style.display='flex'}
+function fecharModal(){document.getElementById('modal').style.display='none'}
+</script>
 
 </body>
-
 </html>

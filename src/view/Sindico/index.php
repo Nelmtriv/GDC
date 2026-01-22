@@ -80,6 +80,7 @@ if ($resultado->num_rows > 0) {
                 </div>
             </div>
             <div class="dashboard-card">
+                
                 <div class="card-title"><i class="fas fa-calendar-alt"></i> Reservas Pendentes</div>
                 <div class="card-content">
 

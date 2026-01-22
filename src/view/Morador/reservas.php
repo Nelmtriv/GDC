@@ -469,18 +469,18 @@ if ($resultado->num_rows > 0) {
                             <div class="form-row">
                                 <div class="form-group">
                                     <label><i class="fas fa-calendar"></i> Data</label>
-                                    <input type="date" name="data" required>
+                                    <input type="date" name="data" id="data" required>
                                 </div>
 
                                 <div class="form-group">
                                     <label><i class="fas fa-clock"></i> Hora Início</label>
-                                    <input type="time" name="hora_inicio" required>
+                                    <input type="time" name="hora_inicio" id="hora_inicio">
                                 </div>
                             </div>
 
                             <div class="form-group">
                                 <label><i class="fas fa-clock"></i> Hora Fim</label>
-                                <input type="time" name="hora_fim" required>
+                                <input type="time" name="hora_fim" id="hora_fim" required>
                             </div>
 
                             <button type="submit" class="btn-submit">
@@ -539,9 +539,6 @@ if ($resultado->num_rows > 0) {
         </main>
     </div>
 
-
-
-
     <script>
         // Validar data mínima
         document.getElementById('data').addEventListener('change', function() {
@@ -579,5 +576,4 @@ if ($resultado->num_rows > 0) {
         }
     </script>
 </body>
-
 </html>
