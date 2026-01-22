@@ -407,9 +407,12 @@ $encomendas = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                     <i class="fas fa-exclamation-triangle"></i> Ocorrências
                 </a>
 
-                <a href="../../logout.php?logout=1" class="logout">
-                    <i class="fas fa-sign-out-alt"></i> Sair
-                </a>
+<a href="../../logout.php?logout=1" 
+   class="logout" 
+   onclick="return confirmarSaida();">
+    <i class="fas fa-sign-out-alt"></i> Sair
+</a>
+
             </nav>
         </aside>
 
@@ -501,7 +504,11 @@ $encomendas = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 
         </main>
     </div>
-
+<script>
+    function confirmarSaida() {
+    return confirm("Tem a certeza que deseja sair?");
+}
+</script>
 </body>
 
 </html>

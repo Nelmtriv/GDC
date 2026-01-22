@@ -321,9 +321,12 @@ if ($resultado->num_rows > 0) {
             <a href="index.php" class="back-btn">
                 <i class="fas fa-arrow-left"></i> Voltar
             </a>
-            <a href="../../controller/AuthController.php?action=logout" class="logout-btn">
-                <i class="fas fa-sign-out-alt"></i> Sair
-            </a>
+<a href="../../logout.php?logout=1" 
+   class="logout-btn" 
+   onclick="return confirmarSaida();">
+    <i class="fas fa-sign-out-alt"></i> Sair
+</a>
+
         </div>
     </header>
 
@@ -567,6 +570,9 @@ if ($resultado->num_rows > 0) {
         const dataInput = document.querySelector('input[type="date"]');
         const hoje = new Date().toISOString().split('T')[0];
         dataInput.min = hoje;
+        function confirmarSaida() {
+    return confirm("Tem a certeza que deseja sair?");
+}
     </script>
 </body>
 </html>

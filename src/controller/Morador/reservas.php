@@ -19,11 +19,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit();
     }
 
-    // Validar se data é futura
-   // =====================
-// VALIDAÇÕES DE DATA E HORA
-// =====================
-
 date_default_timezone_set('Africa/Maputo');
 
 $data_atual = date('Y-m-d');

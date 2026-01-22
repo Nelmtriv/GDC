@@ -213,6 +213,45 @@ body {
     font-size: 14px;
     margin-top: 40px;
 }
+/* ===== SINO DE NOTIFICAÇÃO ===== */
+.notif-bell {
+    position: relative;
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+}
+
+/* SINO */
+.notif-bell i {
+    color: #ef4444 !important; /* vermelho */
+    font-size: 18px;
+    animation: bell-pulse 1.5s infinite;
+}
+
+/* CONTADOR */
+.notif-count {
+    position: absolute;
+    top: -6px;
+    right: -10px;
+    background: #ef4444;
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 999px;
+}
+.notif-bell:hover i {
+    color: #9743d7 !important;
+}
+
+/* ANIMAÇÃO */
+@keyframes bell-pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+    100% { transform: scale(1); }
+}
+
+
 
 /* ===== RESPONSIVO ===== */
 @media (max-width: 768px) {

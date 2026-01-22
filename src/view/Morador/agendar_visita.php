@@ -1,13 +1,12 @@
 
-        
-
 <?php
-session_start();
+require_once __DIR__ . '/../../auth/session.php';
 require_once __DIR__ . '/../../data/conector.php';
 
-/* PROTEÇÃO */
+/* =========================
+   PROTEÇÃO POR TIPO DE USUÁRIO
+========================= */
 if (
-    !isset($_SESSION['id']) ||
     !isset($_SESSION['tipo_usuario']) ||
     $_SESSION['tipo_usuario'] !== 'Morador'
 ) {
@@ -17,17 +16,27 @@ if (
 
 $conexao = (new Conector())->getConexao();
 
-/* Buscar morador */
+/* =========================
+   BUSCAR MORADOR
+========================= */
 $stmt = $conexao->prepare("SELECT id_morador, nome FROM Morador WHERE id_usuario = ?");
 $stmt->bind_param("i", $_SESSION['id']);
 $stmt->execute();
 $morador = $stmt->get_result()->fetch_assoc();
 
+if (!$morador) {
+    session_destroy();
+    header("Location: ../../login.php");
+    exit;
+}
+
 $idMorador   = $morador['id_morador'];
 $nomeMorador = $morador['nome'];
 $iniciais    = strtoupper(substr($nomeMorador, 0, 1));
 
-/* Buscar visitas */
+/* =========================
+   BUSCAR VISITAS
+========================= */
 $stmt = $conexao->prepare("
     SELECT 
         a.data,
@@ -46,6 +55,7 @@ $stmt = $conexao->prepare("
 $stmt->bind_param("i", $idMorador);
 $stmt->execute();
 $visitas = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+
 ?>
 
 <!DOCTYPE html>
@@ -54,6 +64,7 @@ $visitas = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 <meta charset="UTF-8">
 <title>Minhas Visitas</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
 * {
@@ -498,8 +509,45 @@ $visitas = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 .btn-primary{
     background:#9743d7;color:#fff;border:none;
     padding:12px 18px;border-radius:10px;
-    cursor:pointer;display:flex;gap:8px;align-items:center
+    cursor:pointer;display:flex;gap:8px;align-items:center;
+
 }
+/* SELECT DOCUMENTO */
+.select-doc {
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+    background: #f9fafb;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.select-doc:focus {
+    outline: none;
+    border-color: #9743d7;
+    background: #ffffff;
+}
+
+/* INPUT DOCUMENTO */
+#numero_documento {
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+    font-size: 14px;
+}
+
+#numero_documento:focus {
+    outline: none;
+    border-color: #9743d7;
+}
+
+/* ESCONDER */
+.hidden {
+    display: none;
+}
+
 </style>
 </head>
 
@@ -517,9 +565,12 @@ $visitas = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
             <a href="encomendas.php"><i class="fas fa-box"></i> Encomendas</a>
             <a href="avisos.php"><i class="fas fa-bullhorn"></i> Avisos</a>
             <a href="ocorrencias.php"><i class="fas fa-exclamation-triangle"></i> Ocorrências</a>
-            <a href="../../logout.php?logout=1" class="logout">
-                <i class="fas fa-sign-out-alt"></i> Sair
-            </a>
+<a href="../../logout.php?logout=1" 
+   class="logout" 
+   onclick="return confirmarSaida();">
+    <i class="fas fa-sign-out-alt"></i> Sair
+</a>
+
         </nav>
     </aside>
 
@@ -598,27 +649,117 @@ $visitas = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 <!-- MODAL -->
 <div class="modal-overlay" id="modal">
     <div class="modal">
-        <h3><i class="fas fa-calendar-plus"></i> Agendar Visita</h3>
+        <h3>
+            <i class="fas fa-calendar-plus"></i>
+            Agendar Visita
+        </h3>
 
-        <form action="../../controller/Morador/visitas.php" method="POST">
-            <input type="text" name="nome_visitante" placeholder="Nome do visitante" required>
-            <input type="text" name="documento" placeholder="Documento" required>
-            <input type="text" name="motivo" placeholder="Motivo da visita" required>
-            <input type="date" name="data" required min="<?= date('Y-m-d') ?>">
-            <input type="time" name="hora" required>
+        <form id="formVisita" action="../../controller/Morador/visitas.php" method="POST">
 
+            <!-- NOME -->
+            <div class="form-group">
+                <label>Nome do Visitante</label>
+                <input type="text" name="nome_visitante" required>
+            </div>
+
+            <!-- TIPO DOCUMENTO -->
+            <div class="form-group">
+                <label>Tipo de Documento</label>
+                <select id="tipo_documento" class="select-doc" required>
+                    <option value="">Selecione o tipo</option>
+                    <option value="BI">Bilhete de Identidade</option>
+                    <option value="PASSAPORTE">Passaporte</option>
+                    <option value="CARTA">Carta de Condução</option>
+                </select>
+            </div>
+
+            <div class="form-group hidden" id="grupo_numero">
+                <label>Número do Documento</label>
+                <input type="text" id="numero_documento">
+            </div>
+
+            <!-- CAMPO REAL ENVIADO -->
+            <input type="hidden" name="documento" id="documento_final">
+
+            <!-- MOTIVO -->
+            <div class="form-group">
+                <label>Motivo da Visita</label>
+                <input type="text" name="motivo" required>
+            </div>
+
+            <!-- DATA -->
+            <div class="form-group">
+                <label>Data</label>
+                <input type="date" name="data" required min="<?= date('Y-m-d') ?>">
+            </div>
+
+            <!-- HORA -->
+            <div class="form-group">
+                <label>Hora</label>
+                <input type="time" name="hora" required>
+            </div>
+
+            <!-- BOTÕES -->
             <button type="submit" class="btn-primary">
                 <i class="fas fa-check"></i> Agendar
             </button>
-            <button type="button" onclick="fecharModal()">Cancelar</button>
+
+            <button type="button" class="close" onclick="fecharModal()">
+                Cancelar
+            </button>
+
         </form>
     </div>
 </div>
 
+
 <script>
-function abrirModal(){document.getElementById('modal').style.display='flex'}
-function fecharModal(){document.getElementById('modal').style.display='none'}
+function abrirModal() {
+    document.getElementById('modal').style.display = 'flex';
+}
+
+function fecharModal() {
+    document.getElementById('modal').style.display = 'none';
+}
+
+const tipoDoc = document.getElementById('tipo_documento');
+const grupoNumero = document.getElementById('grupo_numero');
+const numeroDoc = document.getElementById('numero_documento');
+const finalDoc = document.getElementById('documento_final');
+const form = document.getElementById('formVisita');
+
+tipoDoc.addEventListener('change', () => {
+
+    if (!tipoDoc.value) {
+        grupoNumero.classList.add('hidden');
+        numeroDoc.value = '';
+        return;
+    }
+
+    grupoNumero.classList.remove('hidden');
+
+    const placeholders = {
+        BI: 'Ex: 110102345678A',
+        PASSAPORTE: 'Ex: M1234567',
+        CARTA: 'Ex: C-123456'
+    };
+
+    numeroDoc.placeholder = placeholders[tipoDoc.value];
+});
+
+form.addEventListener('submit', (e) => {
+
+    if (!tipoDoc.value || !numeroDoc.value.trim()) {
+        e.preventDefault();
+        alert('Selecione o tipo e informe o número do documento');
+        return;
+    }
+
+    finalDoc.value = tipoDoc.value + ': ' + numeroDoc.value.trim();
+});
 </script>
+
+
 
 </body>
 </html>

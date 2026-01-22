@@ -3,6 +3,16 @@ require_once "../data/conector.php";
 
 session_start();
 
+if (!isset($_SESSION['tentativas'])) {
+    $_SESSION['tentativas'] = 0;
+}
+if ($_SESSION['tentativas'] >= 5) {
+    header("Location: ../login.php?erro=" . urlencode(
+        "Login bloqueado. Excedeu o número máximo de 5 tentativas. Tente mais tarde."
+    ));
+    exit();
+}
+
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header("Location: ../login.php");
     exit();
@@ -25,32 +35,60 @@ $stmt->execute();
 $resultado = $stmt->get_result();
 
 if ($resultado && $resultado->num_rows === 1) {
+
     $user = $resultado->fetch_assoc();
 
     if (password_verify($senha, $user['senha_hash'])) {
+
+        $_SESSION['tentativas'] = 0;
+
+ 
         $_SESSION['id'] = $user['id_usuario'];
         $_SESSION['email'] = $user['email'];
-        $_SESSION['tipo_usuario'] = $user['tipo']; 
+        $_SESSION['tipo_usuario'] = $user['tipo'];
 
         switch ($user['tipo']) {
             case 'Morador':
                 header("Location: ../view/Morador/index.php");
-                exit();
+                break;
+
             case 'Sindico':
                 header("Location: ../view/Sindico/index.php");
-                exit();
+                break;
+
             case 'Porteiro':
                 header("Location: ../view/Porteiro/index.php");
-                exit();
+                break;
+
             default:
                 header("Location: ../login.php?erro=" . urlencode("Tipo de usuário inválido."));
-                exit();
         }
+        exit();
+
     } else {
-        header("Location: ../login.php?erro=" . urlencode("Senha incorreta."));
+        $_SESSION['tentativas']++;
+
+        $restantes = 5 - $_SESSION['tentativas'];
+
+        if ($restantes > 0) {
+            header("Location: ../login.php?erro=" . urlencode(
+                "Senha incorreta. Tentativas restantes: $restantes"
+            ));
+        } else {
+            header("Location: ../login.php?erro=" . urlencode(
+                "Login bloqueado após 5 tentativas inválidas."
+            ));
+        }
         exit();
     }
+
 } else {
-    header("Location: ../login.php?erro=" . urlencode("Usuário não encontrado."));
+    $_SESSION['tentativas']++;
+
+    $restantes = 5 - $_SESSION['tentativas'];
+
+    header("Location: ../login.php?erro=" . urlencode(
+        "Usuário não encontrado. Tentativas restantes: $restantes"
+    ));
     exit();
 }

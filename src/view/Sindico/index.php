@@ -51,9 +51,12 @@ if ($resultado->num_rows > 0) {
                 <div class="user-name"><?php echo $userName; ?></div>
                 <div class="user-role"><i class="fas fa-user-shield"></i> Síndico</div>
             </div>
-            <a href="../../logout.php?logout=1" class="logout-btn">
-                <i class="fas fa-sign-out-alt"></i> Sair
-            </a>
+<a href="../../logout.php?logout=1" 
+   class="logout-btn" 
+   onclick="return confirmarSaida();">
+    <i class="fas fa-sign-out-alt"></i> Sair
+</a>
+
         </div>
     </header>
 
@@ -67,7 +70,7 @@ if ($resultado->num_rows > 0) {
     <a href="ocorrencias.php" class="action-btn"><i class="fas fa-exclamation-triangle"></i> Gerir Ocorrências</a>
     <a href="avisos.php" class="action-btn"><i class="fas fa-bullhorn"></i> Publicar Avisos</a>
     <a href="novoVeiculo.php" class="action-btn"><i class="fas fa-car"></i> Gerir Veículos</a>
-    <a href="porteiros.php" class="action-btn"><i class="fas fa-user-tie"></i> Gerir Funcionários</a>
+    <a href="porteiros.php" class="action-btn"><i class="fas fa-user-tie"></i> Gerir Porteiros</a>
     <a href="unidade.php" class="action-btn"><i class="fas fa-home"></i> Gerir Unidades</a> <!-- NOVO CARD -->
 </div>
         </section>
@@ -131,5 +134,10 @@ if ($resultado->num_rows > 0) {
         <p>Sistema Condomínio Digital &copy; <?php echo date('Y'); ?></p>
         <p>Desenvolvido por Nelma Odair Bila</p>
     </footer>
+    <script>
+        function confirmarSaida() {
+    return confirm("Tem a certeza que deseja sair?");
+}
+    </script>
 </body>
 </html>

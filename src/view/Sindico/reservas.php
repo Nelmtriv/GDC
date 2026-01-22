@@ -453,9 +453,12 @@ if ($resultado->num_rows > 0) {
             <a href="index.php" class="back-btn">
                 <i class="fas fa-arrow-left"></i> Voltar
             </a>
-            <a href="../../controller/AuthController.php?action=logout" class="logout-btn">
-                <i class="fas fa-sign-out-alt"></i> Sair
-            </a>
+<a href="../../logout.php?logout=1" 
+   class="logout-btn" 
+   onclick="return confirmarSaida();">
+    <i class="fas fa-sign-out-alt"></i> Sair
+</a>
+
         </div>
     </header>
 
@@ -657,6 +660,9 @@ function nextMonth() {
 }
 
 renderCalendar();
+function confirmarSaida() {
+    return confirm("Tem a certeza que deseja sair?");
+}
 </script>
 
 
