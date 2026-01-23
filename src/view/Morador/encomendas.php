@@ -407,9 +407,12 @@ $encomendas = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                     <i class="fas fa-exclamation-triangle"></i> Ocorrências
                 </a>
 
-                <a href="../../logout.php?logout=1" class="logout">
-                    <i class="fas fa-sign-out-alt"></i> Sair
-                </a>
+<a href="../../logout.php?logout=1" 
+   class="logout" 
+   onclick="return confirmarSaida();">
+    <i class="fas fa-sign-out-alt"></i> Sair
+</a>
+
             </nav>
         </aside>
 
@@ -441,57 +444,71 @@ $encomendas = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                         As encomendas são registradas pelo porteiro quando chegam à portaria.
                     </span>
                 </div>
-                <div class="grid">
-                    <?php if (empty($encomendas)): ?>
-                        <div class="empty">
-                            <i class="fas fa-box-open"></i>
-                            <h3>Nenhuma encomenda registrada</h3>
-                            <p>Quando uma encomenda chegar, ela aparecerá aqui.</p>
-                        </div>
-                    <?php else: ?>
-                        <?php foreach ($encomendas as $e):
-                            $status = $e['status'] == 1 ? 'entregue' : 'pendente';
-                        ?>
-                            <div class="card">
-                                <h4>
-                                    <i class="fas fa-box"></i>
-                                    Encomenda
-                                </h4>
+                <?php if (empty($encomendas)): ?>
 
-                                <div class="meta">
-                                    <strong>Recebida em:</strong>
-                                    <?= date('d/m/Y H:i', strtotime($e['data_recepcao'])) ?>
-                                </div>
+    <div class="empty">
+        <i class="fas fa-box-open"></i>
+        <h3>Nenhuma encomenda registrada</h3>
+        <p>Quando uma encomenda chegar, ela aparecerá aqui.</p>
+    </div>
 
-                                <div class="meta">
-                                    <strong>Descrição:</strong>
-                                    <?= htmlspecialchars($e['descricao']) ?>
-                                </div>
+<?php else: ?>
 
-                                <?php if (!empty($e['data_entrega'])): ?>
-                                    <div class="meta">
-                                        <strong>Entregue em:</strong>
-                                        <?= date('d/m/Y H:i', strtotime($e['data_entrega'])) ?>
-                                    </div>
-                                <?php endif; ?>
+<table style="width:100%;border-collapse:collapse;background:#fff">
+    <thead>
+        <tr style="background:#f3f4f6">
+            <th style="padding:14px;text-align:left">Descrição</th>
+            <th>Recebida em</th>
+            <th>Entregue em</th>
+            <th>Status</th>
+        </tr>
+    </thead>
 
-                                <span class="status <?= $status ?>">
-                                    <i class="fas <?= $status === 'entregue' ? 'fa-check-circle' : 'fa-clock' ?>"></i>
-                                    <?= $status === 'entregue'
-                                        ? 'Entregue ao morador'
-                                        : 'Aguardando retirada'
-                                    ?>
-                                </span>
-                            </div>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
+    <tbody>
+    <?php foreach ($encomendas as $e):
+        $status = $e['status'] == 1 ? 'entregue' : 'pendente';
+    ?>
+        <tr style="border-bottom:1px solid #e5e7eb">
+            <td style="padding:14px">
+                <?= htmlspecialchars($e['descricao']) ?>
+            </td>
 
-                </div>
+            <td>
+                <?= date('d/m/Y H:i', strtotime($e['data_recepcao'])) ?>
+            </td>
+
+            <td>
+                <?= !empty($e['data_entrega'])
+                    ? date('d/m/Y H:i', strtotime($e['data_entrega']))
+                    : '--'
+                ?>
+            </td>
+
+            <td>
+                <span class="status <?= $status ?>">
+                    <i class="fas <?= $status === 'entregue' ? 'fa-check-circle' : 'fa-clock' ?>"></i>
+                    <?= $status === 'entregue'
+                        ? 'Entregue ao morador'
+                        : 'Aguardando retirada'
+                    ?>
+                </span>
+            </td>
+        </tr>
+    <?php endforeach; ?>
+    </tbody>
+</table>
+
+<?php endif; ?>
+
             </div>
 
         </main>
     </div>
-
+<script>
+    function confirmarSaida() {
+    return confirm("Tem a certeza que deseja sair?");
+}
+</script>
 </body>
 
 </html>

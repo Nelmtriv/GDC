@@ -254,81 +254,81 @@ if ($resultado->num_rows > 0) {
         }
 
 /* ===== LAYOUT ===== */
-.layout {
-    display: flex;
-    min-height: 100vh;
-}
+        .layout {
+            display: flex;
+            min-height: 100vh;
+        }
 
-/* ===== SIDEBAR ===== */
-.sidebar {
-    width: 240px;
-    background: #9743d7;
-    color: #ffffff;
-    padding: 25px 20px;
-    display: flex;
-    flex-direction: column;
-}
+        /* ===== SIDEBAR ===== */
+        .sidebar {
+            width: 240px;
+            background: #9743d7;
+            color: #ffffff;
+            padding: 25px 20px;
+            display: flex;
+            flex-direction: column;
+        }
 
-/* TÍTULO */
-.sidebar h2 {
-    font-size: 20px;
-    margin-bottom: 30px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-weight: 600;
-}
+        /* TÍTULO */
+        .sidebar h2 {
+            font-size: 20px;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+        }
 
-/* NAV */
-.sidebar nav {
-    display: flex;
-    flex-direction: column;
-}
+        /* NAV */
+        .sidebar nav {
+            display: flex;
+            flex-direction: column;
+        }
 
-/* LINKS */
-.sidebar nav a {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 14px 16px;
-    color: #ffffff;
-    text-decoration: none;
-    border-radius: 10px;
-    margin-bottom: 10px;
-    font-size: 15px;
-    transition: background 0.2s ease, color 0.2s ease;
-    background: transparent; /* IMPORTANTE */
-}
+        /* LINKS */
+        .sidebar nav a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 16px;
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            font-size: 15px;
+            transition: background 0.2s ease, color 0.2s ease;
+            background: transparent;
+            /* IMPORTANTE */
+        }
 
-/* ÍCONES */
-.sidebar nav a i {
-    color: #ffffff;
-}
+        /* ÍCONES */
+        .sidebar nav a i {
+            color: #ffffff;
+        }
 
-/* HOVER (somente quando NÃO ativo) */
-.sidebar nav a:hover:not(.active) {
-    background: rgba(255, 255, 255, 0.18);
-}
+        /* HOVER (somente quando NÃO ativo) */
+        .sidebar nav a:hover:not(.active) {
+            background: rgba(255, 255, 255, 0.18);
+        }
 
-/* ===== ITEM ATIVO — BRANCO REAL ===== */
-.sidebar nav a.active {
-    background: #ffffff !important;
-    color: #9743d7 !important;
-    font-weight: 600;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-}
+        /* ===== ITEM ATIVO — BRANCO REAL ===== */
+        .sidebar nav a.active {
+            background: #ffffff !important;
+            color: #9743d7 !important;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
 
-/* ÍCONE DO ATIVO */
-.sidebar nav a.active i {
-    color: #9743d7 !important;
-}
+        /* ÍCONE DO ATIVO */
+        .sidebar nav a.active i {
+            color: #9743d7 !important;
+        }
 
-/* LOGOUT */
-.sidebar .logout {
-    margin-top: auto;
-    background: rgba(0,0,0,0.25);
-}
-
+        /* LOGOUT */
+        .sidebar .logout {
+            margin-top: auto;
+            background: rgba(0, 0, 0, 0.25);
+        }
 /* ===== CONTEÚDO ===== */
 .content {
     flex: 1;
@@ -400,10 +400,12 @@ if ($resultado->num_rows > 0) {
                 <a href="ocorrencias.php">
                     <i class="fas fa-exclamation-triangle"></i> Ocorrências
                 </a>
+<a href="../../logout.php?logout=1" 
+   class="logout" 
+   onclick="return confirmarSaida();">
+    <i class="fas fa-sign-out-alt"></i> Sair
+</a>
 
-                <a href="../../logout.php?logout=1" class="logout">
-                    <i class="fas fa-sign-out-alt"></i> Sair
-                </a>
             </nav>
         </aside>
 
@@ -469,18 +471,18 @@ if ($resultado->num_rows > 0) {
                             <div class="form-row">
                                 <div class="form-group">
                                     <label><i class="fas fa-calendar"></i> Data</label>
-                                    <input type="date" name="data" required>
+                                    <input type="date" name="data" id="data" required>
                                 </div>
 
                                 <div class="form-group">
                                     <label><i class="fas fa-clock"></i> Hora Início</label>
-                                    <input type="time" name="hora_inicio" required>
+                                    <input type="time" name="hora_inicio" id="hora_inicio">
                                 </div>
                             </div>
 
                             <div class="form-group">
                                 <label><i class="fas fa-clock"></i> Hora Fim</label>
-                                <input type="time" name="hora_fim" required>
+                                <input type="time" name="hora_fim" id="hora_fim" required>
                             </div>
 
                             <button type="submit" class="btn-submit">
@@ -539,9 +541,6 @@ if ($resultado->num_rows > 0) {
         </main>
     </div>
 
-
-
-
     <script>
         // Validar data mínima
         document.getElementById('data').addEventListener('change', function() {
@@ -577,7 +576,9 @@ if ($resultado->num_rows > 0) {
                 }, 400);
             }, 3000);
         }
+        function confirmarSaida() {
+    return confirm("Tem a certeza que deseja sair?");
+}
     </script>
 </body>
-
 </html>

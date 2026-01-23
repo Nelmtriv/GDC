@@ -30,46 +30,51 @@ if (!isset($_POST['acao'], $_POST['id_agendamento'])) {
 }
 
 $acao = $_POST['acao'];
-$id_agendamento = (int) $_POST['id_agendamento'];
+$idAgendamento = (int) $_POST['id_agendamento'];
+$idPorteiro = (int) $_SESSION['id'];
 
 $conexao = (new Conector())->getConexao();
 
+
 try {
 
-    /* VERIFICAR SE JÁ EXISTE REGISTRO */
+    /* BUSCAR AGENDAMENTO */
+    $stmt = $conexao->prepare("
+        SELECT id_agendamento
+        FROM Agendamento
+        WHERE id_agendamento = ?
+    ");
+    $stmt->bind_param("i", $idAgendamento);
+    $stmt->execute();
+
+    if ($stmt->get_result()->num_rows === 0) {
+        throw new Exception('Agendamento não encontrado');
+    }
+
+    /* BUSCAR REGISTRO (se existir) */
     $stmt = $conexao->prepare("
         SELECT id_registro, entrada, saida
         FROM Registro
         WHERE id_agendamento = ?
     ");
-    $stmt->bind_param("i", $id_agendamento);
+    $stmt->bind_param("i", $idAgendamento);
     $stmt->execute();
     $registro = $stmt->get_result()->fetch_assoc();
 
-    /* ===== REGISTRAR ENTRADA ===== */
+    /* ===== ENTRADA ===== */
     if ($acao === 'entrada') {
 
-        if ($registro && $registro['entrada']) {
-            throw new Exception('Entrada já registrada');
-        }
-
         if ($registro) {
-            // Atualiza registro existente
-            $stmt = $conexao->prepare("
-                UPDATE Registro
-                SET entrada = NOW()
-                WHERE id_agendamento = ?
-            ");
-            $stmt->bind_param("i", $id_agendamento);
-        } else {
-            // Cria novo registro
-            $stmt = $conexao->prepare("
-                INSERT INTO Registro (id_agendamento, entrada)
-                VALUES (?, NOW())
-            ");
-            $stmt->bind_param("i", $id_agendamento);
+            throw new Exception('Entrada já foi registrada');
         }
 
+        $stmt = $conexao->prepare("
+            INSERT INTO Registro (
+                id_agendamento,
+                entrada
+            ) VALUES (?, NOW())
+        ");
+        $stmt->bind_param("i", $idAgendamento);
         $stmt->execute();
 
         echo json_encode([
@@ -79,7 +84,6 @@ try {
         exit;
     }
 
-    /* ===== REGISTRAR SAÍDA ===== */
     if ($acao === 'saida') {
 
         if (!$registro || !$registro['entrada']) {
@@ -93,9 +97,9 @@ try {
         $stmt = $conexao->prepare("
             UPDATE Registro
             SET saida = NOW()
-            WHERE id_agendamento = ?
+            WHERE id_registro = ?
         ");
-        $stmt->bind_param("i", $id_agendamento);
+        $stmt->bind_param("i", $registro['id_registro']);
         $stmt->execute();
 
         echo json_encode([

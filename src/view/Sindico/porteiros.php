@@ -309,9 +309,12 @@ td{
             <i class="fas fa-arrow-left"></i> Voltar
         </a>
 
-        <a href="../../controller/AuthController.php?action=logout" class="btn-top btn-logout">
-            <i class="fas fa-sign-out-alt"></i> Sair
-        </a>
+<a href="../../logout.php?logout=1" 
+   class=" btn-top btn-logout" 
+   onclick="return confirmarSaida();">
+    <i class="fas fa-sign-out-alt"></i> Sair
+</a>
+
     </div>
 </header>
 
@@ -369,6 +372,10 @@ td{
     </div>
 
 </main>
-
+<script>
+    function confirmarSaida() {
+    return confirm("Tem a certeza que deseja sair?");
+}
+</script>
 </body>
 </html>

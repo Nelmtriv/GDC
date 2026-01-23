@@ -1,6 +1,8 @@
 CREATE DATABASE CondominioDigital;
 USE CondominioDigital;
 
+
+
 CREATE TABLE Usuario (
     id_usuario INT AUTO_INCREMENT PRIMARY KEY,
     email VARCHAR(100) NOT NULL UNIQUE,
@@ -30,7 +32,7 @@ CREATE TABLE Morador (
     FOREIGN KEY (id_usuario) REFERENCES Usuario(id_usuario),
     FOREIGN KEY (id_unidade) REFERENCES Unidade(id_unidade)
 );
-
+select * from condominiodigital.porteiro;
 CREATE TABLE Sindico (
     id_sindico INT AUTO_INCREMENT PRIMARY KEY,
     id_usuario INT,
@@ -48,10 +50,9 @@ CREATE TABLE Veiculo (
 CREATE TABLE Visitante (
     id_visitante INT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,
-    documento VARCHAR(50) NOT NULL
+    documento VARCHAR(50) NOT NULL,
+    tipo_documento VARCHAR(50) NOT NULL
 );
-ALTER TABLE Visitante
-ADD COLUMN tipo_documento VARCHAR(50) NOT NULL;
 
 CREATE TABLE Agendamento (
     id_agendamento INT AUTO_INCREMENT PRIMARY KEY,
@@ -62,7 +63,17 @@ CREATE TABLE Agendamento (
     FOREIGN KEY (id_morador) REFERENCES Morador(id_morador),
     FOREIGN KEY (id_visitante) REFERENCES Visitante(id_visitante)
 );
+ALTER TABLE Agendamento
+ADD tipo_documento VARCHAR(30) NOT NULL,
+ADD numero_documento VARCHAR(30) NOT NULL;
+ALTER TABLE Agendamento
+ADD motivo VARCHAR(100) NOT NULL;
 
+ALTER TABLE Registro
+DROP FOREIGN KEY registro_ibfk_2;
+
+ALTER TABLE Registro
+DROP COLUMN id_porteiro;
 
 CREATE TABLE Registro (
     id_registro INT AUTO_INCREMENT PRIMARY KEY,

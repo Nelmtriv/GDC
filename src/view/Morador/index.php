@@ -1,23 +1,102 @@
 <?php
+require_once __DIR__ . '/../../auth/session.php';
 require_once __DIR__ . '/../../data/conector.php';
 
-session_start();
-
-$conector = new Conector();
-$conexao = $conector->getConexao();
-
-$stmt = $conexao->prepare("Select * from morador Where id_usuario = ?");
-$stmt->bind_param("s", $_SESSION['id']);
-$stmt->execute();
-$resultado = $stmt->get_result();
-
-if($resultado->num_rows > 0) {
-    $row = $resultado->fetch_assoc();
-    $userName = $row['nome'];
-    $idMorador = $row['id_morador'];
-    $idUnidade = $row['id_unidade'];
-    $iniciais = strtoupper(substr($userName, 0, 1));
+/* =========================
+   PROTEÇÃO POR PERFIL
+========================= */
+if (!isset($_SESSION['tipo_usuario']) || $_SESSION['tipo_usuario'] !== 'Morador') {
+    header("Location: ../../login.php");
+    exit;
 }
+
+$conexao = (new Conector())->getConexao();
+
+/* =========================
+   BUSCAR MORADOR
+========================= */
+$stmt = $conexao->prepare("
+    SELECT id_morador, id_unidade, nome
+    FROM Morador
+    WHERE id_usuario = ?
+");
+$stmt->bind_param("i", $_SESSION['id']);
+$stmt->execute();
+$morador = $stmt->get_result()->fetch_assoc();
+
+if (!$morador) {
+    session_destroy();
+    header("Location: ../../login.php");
+    exit;
+}
+
+$idMorador = $morador['id_morador'];
+$idUnidade = $morador['id_unidade'];
+$userName  = $morador['nome'];
+$iniciais  = strtoupper(substr($userName, 0, 1));
+
+/* =========================
+   DATA ATUAL
+========================= */
+$hoje = date('Y-m-d');
+
+/* =========================
+   VISITAS AGENDADAS (HOJE)
+========================= */
+$stmt = $conexao->prepare("
+    SELECT COUNT(*) AS total
+    FROM Agendamento
+    WHERE id_morador = ?
+      AND data = ?
+");
+$stmt->bind_param("is", $idMorador, $hoje);
+$stmt->execute();
+$visitasAgendadas = $stmt->get_result()->fetch_assoc()['total'];
+
+/* =========================
+   RESERVAS ATIVAS (HOJE)
+========================= */
+$stmt = $conexao->prepare("
+    SELECT COUNT(*) AS total
+    FROM Reserva
+    WHERE id_morador = ?
+      AND data = ?
+");
+$stmt->bind_param("is", $idMorador, $hoje);
+$stmt->execute();
+$reservasAtivas = $stmt->get_result()->fetch_assoc()['total'];
+
+/* =========================
+   ENTREGAS PENDENTES
+   status = 0 → pendente
+========================= */
+$stmt = $conexao->prepare("
+    SELECT COUNT(*) AS total
+    FROM Entrega
+    WHERE id_morador = ?
+      AND status = 0
+");
+$stmt->bind_param("i", $idMorador);
+$stmt->execute();
+$entregasPendentes = $stmt->get_result()->fetch_assoc()['total'];
+
+/* =========================
+   AVISOS NÃO LIDOS
+========================= */
+$stmt = $conexao->prepare("
+    SELECT COUNT(*) AS total
+    FROM Aviso a
+    WHERE NOT EXISTS (
+        SELECT 1
+        FROM Leitura_Aviso l
+        WHERE l.id_aviso = a.id_aviso
+          AND l.id_usuario = ?
+    )
+");
+$stmt->bind_param("i", $_SESSION['id']);
+$stmt->execute();
+$avisosNovos = $stmt->get_result()->fetch_assoc()['total'];
+
 ?>
 
 <!DOCTYPE html>
@@ -50,9 +129,12 @@ if($resultado->num_rows > 0) {
                     <i class="fas fa-home"></i> Morador
                 </div>
             </div>
-            <a href="../../logout.php?logout=1" class="logout-btn">
-                <i class="fas fa-sign-out-alt"></i> Sair
-            </a>
+           <a href="../../logout.php?logout=1" 
+   class="logout-btn" 
+   onclick="return confirmarSaida();">
+    <i class="fas fa-sign-out-alt"></i> Sair
+</a>
+
         </div>
     </header>
 
@@ -93,8 +175,8 @@ if($resultado->num_rows > 0) {
                     <i class="fas fa-users"></i> Visitas Agendadas
                 </div>
                 <div class="card-content">
-                    <p>0</p>
-                    <p>Nenhuma visita agendada</p>
+                    <p><?= $visitasAgendadas ?></p>
+        <p>Visitas agendadas para hoje</p>
                 </div>
             </div>
 
@@ -104,21 +186,30 @@ if($resultado->num_rows > 0) {
                     <i class="fas fa-calendar-check"></i> Reservas Ativas
                 </div>
                 <div class="card-content">
-                    <p>0</p>
-                    <p>Nenhuma reserva ativa</p>
+                    <p><?= $reservasAtivas ?></p>
+
+                    <p>Reservas ativas </p>
                 </div>
             </div>
 
-            <!-- Card 3: Encomendas -->
             <div class="dashboard-card">
-                <div class="card-title">
-                    <i class="fas fa-box-open"></i> Encomendas Pendentes
-                </div>
-                <div class="card-content">
-                    <p>0</p>
-                    <p>Nenhuma encomenda pendente</p>
-                </div>
-            </div>
+    <div class="card-title">
+        <i class="fas fa-box-open"></i> Encomendas Pendentes
+
+        <?php if ($entregasPendentes > 0): ?>
+            <span class="notif-bell">
+                <i class="fas fa-bell"></i>
+                <span class="notif-count"><?= $entregasPendentes ?></span>
+            </span>
+        <?php endif; ?>
+    </div>
+
+    <div class="card-content">
+        <p><?= $entregasPendentes ?></p>
+        <p>Encomendas para hoje</p>
+    </div>
+</div>
+
 
             <!-- Card 4: Avisos -->
             <div class="dashboard-card">
@@ -126,8 +217,9 @@ if($resultado->num_rows > 0) {
                     <i class="fas fa-bullhorn"></i> Avisos Novos
                 </div>
                 <div class="card-content">
-                    <p>0</p>
-                    <p>Nenhum aviso novo</p>
+                    <p><?= $avisosNovos ?></p>
+
+                    <p>Avisos novs</p>
                 </div>
             </div>
         </div>
@@ -171,6 +263,9 @@ if($resultado->num_rows > 0) {
             card.classList.add('fade-in');
         });
     });
+    function confirmarSaida() {
+    return confirm("Tem a certeza que deseja sair?");
+}
     </script>
 </body>
 
