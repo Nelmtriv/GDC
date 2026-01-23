@@ -42,10 +42,22 @@ if ($resultado && $resultado->num_rows === 1) {
 
         $_SESSION['tentativas'] = 0;
 
- 
+        // Criar sessão com timeout de 24h
         $_SESSION['id'] = $user['id_usuario'];
         $_SESSION['email'] = $user['email'];
         $_SESSION['tipo_usuario'] = $user['tipo'];
+        $_SESSION['login_time'] = time();
+        $_SESSION['session_timeout'] = 24 * 60 * 60; // 24 horas
+
+        // Criar cookie persistente por 24h
+        $cookie_name = 'gdc_session_' . md5($user['id_usuario']);
+        $cookie_value = json_encode([
+            'id_usuario' => $user['id_usuario'],
+            'email' => $user['email'],
+            'tipo' => $user['tipo'],
+            'login_time' => time()
+        ]);
+        setcookie($cookie_name, $cookie_value, time() + (24 * 60 * 60), '/', '', false, true);
 
         switch ($user['tipo']) {
             case 'Morador':
