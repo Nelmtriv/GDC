@@ -1,0 +1,5 @@
+src/Config/*
+!src/Config/.gitkeep
+src2
+uploads/*
+!uploads/.gitkeep

@@ -1,0 +1,96 @@
+<?php
+require_once __DIR__ . "/../../Data/conector.php";
+
+session_start();
+$conector = new Conector();
+$conexao = $conector->getConexao();
+
+if (!isset($_SESSION['tentativas'])) {
+    $_SESSION['tentativas'] = 0;
+}
+if ($_SESSION['tentativas'] >= 5) {
+    header("Location: /GDC/src/View/Auth/login.php?erro=" . urlencode(
+        "Login bloqueado. Excedeu o número máximo de 5 tentativas. Tente mais tarde."
+    ));
+    exit();
+}
+
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    header("Location: ../../View/Auth/login.php");
+    exit();
+}
+
+$email = isset($_POST['email']) ? trim($_POST['email']) : '';
+$senha = isset($_POST['senha']) ? $_POST['senha'] : '';
+
+if (empty($email) || empty($senha)) {
+    header("Location: ../../View/Auth/login.php?erro=" . urlencode("Preencha email e senha."));
+    exit();
+}
+
+$stmt = $conexao->prepare("SELECT * FROM Usuario WHERE email = ?");
+$stmt->bind_param("s", $email);
+$stmt->execute();
+$resultado = $stmt->get_result();
+
+if ($resultado && $resultado->num_rows === 1) {
+
+    $user = $resultado->fetch_assoc();
+
+    if (password_verify($senha, $user['senha_hash'])) {
+
+        $_SESSION['tentativas'] = 0;
+        $_SESSION['usuario_id'] = $user['id_usuario'];
+        $_SESSION['email'] = $user['email'];
+        $_SESSION['tipo'] = $user['tipo'];
+
+        // 🔍 DEBUG - REMOVER DEPOIS
+        error_log("LOGIN OK - ID: " . $_SESSION['usuario_id'] . " | Tipo: " . $_SESSION['tipo']);
+        file_put_contents('/tmp/login_debug.txt', print_r($_SESSION, true));
+
+        switch ($user['tipo']) {
+            case 'Morador':
+                header("Location: /GDC/src/View/Morador/index.php");
+                break;
+
+            case 'Sindico':
+                header("Location: /GDC/src/View/Sindico/index.php");
+                break;
+
+            case 'Porteiro':
+                header("Location: /GDC/src/View/Porteiro/index.php");
+                break;
+
+            default:
+                header("Location: /GDC/src/View/Auth/login.php?erro=" . urlencode("Tipo de usuário inválido."));
+        }
+
+        exit();
+
+    } else {
+        $_SESSION['tentativas']++;
+
+        $restantes = 5 - $_SESSION['tentativas'];
+
+        if ($restantes > 0) {
+            header("Location: /GDC/src/View/Auth/login.php?erro=" . urlencode(
+                "Senha incorreta. Tentativas restantes: $restantes"
+            ));
+        } else {
+            header("Location: /GDC/src/View/Auth/login.php?erro=" . urlencode(
+                "Login bloqueado após 5 tentativas inválidas."
+            ));
+        }
+        exit();
+    }
+
+} else {
+    $_SESSION['tentativas']++;
+
+    $restantes = 5 - $_SESSION['tentativas'];
+
+    header("Location: /GDC/src/View/Auth/login.php?erro=" . urlencode(
+        "Usuário não encontrado. Tentativas restantes: $restantes"
+    ));
+    exit();
+}
