@@ -1,10 +1,19 @@
+
 <?php
 require_once __DIR__ . '/../../auth/session.php';
 require_once __DIR__ . '/../../data/conector.php';
 
-if (!isset($_SESSION['tipo_usuario']) || $_SESSION['tipo_usuario'] !== 'Porteiro') {
-    header("Location: ../../login.php");
-    exit;
+header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+header("Pragma: no-cache");
+
+
+if (
+    !isset($_SESSION['id']) ||
+    !isset($_SESSION['tipo_usuario']) ||
+    $_SESSION['tipo_usuario'] !== 'Porteiro'
+) {
+    header('Location: ../../login.php');
+    exit();
 }
 
 $conexao = (new Conector())->getConexao();
@@ -185,6 +194,8 @@ function confirmarSaida() {
     return confirm("Tem a certeza que deseja sair?");
 }
 </script>
+
+<script src="../../../assets/js/auto-logout.js"></script>
 
 </body>
 </html>
